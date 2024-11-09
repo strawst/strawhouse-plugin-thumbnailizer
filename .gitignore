@@ -1,0 +1,13 @@
+# Local
+.local
+.env
+
+# Build
+/driver/pb
+
+# Editor
+.vscode/
+.idea/
+
+# OS
+.DS_Store
