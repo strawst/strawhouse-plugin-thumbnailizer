@@ -4,7 +4,7 @@ go 1.23.4
 
 require (
 	github.com/bsthun/gut v1.1.1
-	github.com/kolesa-team/go-webp v1.0.4
+	github.com/chai2010/webp v1.1.1
 	github.com/strawst/strawhouse-go v0.2.0
 )
 

@@ -5,8 +5,7 @@ package resize
 import (
 	"bytes"
 	"github.com/bsthun/gut"
-	"github.com/kolesa-team/go-webp/encoder"
-	"github.com/kolesa-team/go-webp/webp"
+	"github.com/chai2010/webp"
 	"image"
 	"image/color"
 	"math"
@@ -67,9 +66,11 @@ func ResizeImage(src image.Image, targetPixels int, quality float32) ([]byte, *g
 	// Encode image
 encode:
 	var buf bytes.Buffer
-	options, _ := encoder.NewLossyEncoderOptions(encoder.PresetPhoto, quality)
-	options.Method = 6
-	if err := webp.Encode(&buf, dst, options); err != nil {
+	if err := webp.Encode(&buf, dst, &webp.Options{
+		Lossless: false,
+		Exact:    false,
+		Quality:  quality,
+	}); err != nil {
 		return nil, gut.Err(false, "error encoding image", err)
 	}
 
