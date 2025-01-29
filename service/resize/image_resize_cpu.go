@@ -9,6 +9,7 @@ import (
 	"image/color"
 	"image/jpeg"
 	"math"
+	"sync"
 )
 
 func ResizeImage(src image.Image, targetPixels int) ([]byte, *gut.ErrorInstance) {
@@ -21,13 +22,19 @@ func ResizeImage(src image.Image, targetPixels int) ([]byte, *gut.ErrorInstance)
 	dst := image.NewRGBA(image.Rect(0, 0, targetWidth, targetHeight))
 
 	// Resize the image using bicubic interpolation
+	wg := sync.WaitGroup{}
 	for y := 0; y < targetHeight; y++ {
 		for x := 0; x < targetWidth; x++ {
-			srcX := float64(x) * float64(src.Bounds().Dx()) / float64(targetWidth)
-			srcY := float64(y) * float64(src.Bounds().Dy()) / float64(targetHeight)
-			dst.Set(x, y, bicubicInterpolation(src, srcX, srcY))
+			wg.Add(1)
+			go func() {
+				srcX := float64(x) * float64(src.Bounds().Dx()) / float64(targetWidth)
+				srcY := float64(y) * float64(src.Bounds().Dy()) / float64(targetHeight)
+				dst.Set(x, y, bicubicInterpolation(src, srcX, srcY))
+				wg.Done()
+			}()
 		}
 	}
+	wg.Wait()
 
 	// Encode the resized image to JPEG
 	var buf bytes.Buffer

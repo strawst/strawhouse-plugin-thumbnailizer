@@ -18,13 +18,13 @@ type Plug struct {
 
 func (r *Plug) Load(callback strawhouse.PluginCallback) {
 	r.callback = callback
-	r.bindId = r.callback.Bind(strawhouse.FeedTypeUpload, "/album/", func(resp any) {
+	r.bindId = r.callback.Bind(strawhouse.FeedTypeUpload, "/st/album/", func(resp any) {
 		process.UploadProcessor(r, resp.(*pb.UploadFeedResponse))
 	})
 }
 
 func (r *Plug) Unload() {
-	r.callback.Unbind(strawhouse.FeedTypeUpload, "/album/", r.bindId)
+	r.callback.Unbind(strawhouse.FeedTypeUpload, "/st/album/", r.bindId)
 }
 
 func (r *Plug) Callback() strawhouse.PluginCallback {

@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"github.com/bsthun/gut"
 	"github.com/strawst/strawhouse-go/pb"
-	"image/jpeg"
-	"log"
+	"image"
+	_ "image/jpeg"
+	_ "image/png"
 	"path/filepath"
 	"strawhouse-plugin-thumbnailizer/service/resize"
 	"strawhouse-plugin-thumbnailizer/type/iface"
@@ -13,9 +14,8 @@ import (
 )
 
 func UploadProcessor(c iface.Callbacker, res *pb.UploadFeedResponse) {
-	log.Printf("upload processor")
 	directories := strings.Split(res.Directory, "/")
-	if directories[3] != "upload" {
+	if directories[4] != "upload" {
 		return
 	}
 
@@ -28,7 +28,7 @@ func UploadProcessor(c iface.Callbacker, res *pb.UploadFeedResponse) {
 	content := writer.Bytes()
 
 	// Decode the JPEG image
-	img, err := jpeg.Decode(bytes.NewReader(content))
+	img, _, err := image.Decode(bytes.NewReader(content))
 	if err != nil {
 		gut.Debug("[thumbnailizer] error decoding image", err)
 		return
@@ -47,17 +47,15 @@ func UploadProcessor(c iface.Callbacker, res *pb.UploadFeedResponse) {
 	}
 
 	go func() {
-		log.Printf("resized03: %v, resized20: %v", len(resized03), len(resized20))
 		reader := bytes.NewReader(resized03)
-		_, _, _, er = c.Callback().Upload(res.Name, filepath.Join(strings.Join(directories[0:3], "/"), "tmb03"), reader)
+		_, _, _, er = c.Callback().Upload(res.Name, filepath.Join(strings.Join(directories[0:4], "/"), "tmb03"), reader)
 		if er != nil {
 			gut.Debug("[thumbnailizer] error uploading thumbnail", er)
 			return
 		}
 
-		log.Printf("uploading tmb20")
 		reader = bytes.NewReader(resized20)
-		_, _, _, er = c.Callback().Upload(res.Name, filepath.Join(strings.Join(directories[0:3], "/"), "tmb20"), reader)
+		_, _, _, er = c.Callback().Upload(res.Name, filepath.Join(strings.Join(directories[0:4], "/"), "tmb20"), reader)
 		if er != nil {
 			gut.Debug("[thumbnailizer] error uploading thumbnail", er)
 			return
