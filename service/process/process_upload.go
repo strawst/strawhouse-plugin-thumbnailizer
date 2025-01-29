@@ -46,6 +46,12 @@ func UploadProcessor(c iface.Callbacker, res *pb.UploadFeedResponse) {
 		return
 	}
 
+	resized80, er := resize.ResizeImage(img, 8000000)
+	if er != nil {
+		gut.Debug("[thumbnailizer] error resizing image", er)
+		return
+	}
+
 	go func() {
 		reader := bytes.NewReader(resized03)
 		_, _, _, er = c.Callback().Upload(res.Name, filepath.Join(strings.Join(directories[0:4], "/"), "tmb03"), reader)
@@ -56,6 +62,13 @@ func UploadProcessor(c iface.Callbacker, res *pb.UploadFeedResponse) {
 
 		reader = bytes.NewReader(resized20)
 		_, _, _, er = c.Callback().Upload(res.Name, filepath.Join(strings.Join(directories[0:4], "/"), "tmb20"), reader)
+		if er != nil {
+			gut.Debug("[thumbnailizer] error uploading thumbnail", er)
+			return
+		}
+
+		reader = bytes.NewReader(resized80)
+		_, _, _, er = c.Callback().Upload(res.Name, filepath.Join(strings.Join(directories[0:4], "/"), "tmb80"), reader)
 		if er != nil {
 			gut.Debug("[thumbnailizer] error uploading thumbnail", er)
 			return
