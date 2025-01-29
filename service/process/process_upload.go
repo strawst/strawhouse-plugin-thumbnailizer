@@ -34,19 +34,19 @@ func UploadProcessor(c iface.Callbacker, res *pb.UploadFeedResponse) {
 		return
 	}
 
-	resized03, er := resize.ResizeImage(img, 300000)
+	resized03, er := resize.ResizeImage(img, 300000, 70)
 	if er != nil {
 		gut.Debug("[thumbnailizer] error resizing image", er)
 		return
 	}
 
-	resized20, er := resize.ResizeImage(img, 2000000)
+	resized20, er := resize.ResizeImage(img, 2000000, 80)
 	if er != nil {
 		gut.Debug("[thumbnailizer] error resizing image", er)
 		return
 	}
 
-	resized80, er := resize.ResizeImage(img, 8000000)
+	resized80, er := resize.ResizeImage(img, 8000000, 90)
 	if er != nil {
 		gut.Debug("[thumbnailizer] error resizing image", er)
 		return

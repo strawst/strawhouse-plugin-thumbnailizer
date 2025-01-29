@@ -12,11 +12,17 @@ import (
 	"sync"
 )
 
-func ResizeImage(src image.Image, targetPixels int) ([]byte, *gut.ErrorInstance) {
+func ResizeImage(src image.Image, targetPixels int, quality int) ([]byte, *gut.ErrorInstance) {
 	// Calculate the target dimensions while maintaining the aspect ratio
 	aspectRatio := float64(src.Bounds().Dx()) / float64(src.Bounds().Dy())
 	targetWidth := int(math.Sqrt(float64(targetPixels) * aspectRatio))
 	targetHeight := int(float64(targetPixels) / float64(targetWidth))
+
+	// Handle target larger than source
+	if targetWidth > src.Bounds().Dx() {
+		targetWidth = src.Bounds().Dx()
+		targetHeight = src.Bounds().Dy()
+	}
 
 	// Create a new image with the target dimensions
 	dst := image.NewRGBA(image.Rect(0, 0, targetWidth, targetHeight))
@@ -38,7 +44,9 @@ func ResizeImage(src image.Image, targetPixels int) ([]byte, *gut.ErrorInstance)
 
 	// Encode the resized image to JPEG
 	var buf bytes.Buffer
-	if err := jpeg.Encode(&buf, dst, nil); err != nil {
+	if err := jpeg.Encode(&buf, dst, &jpeg.Options{
+		Quality: quality,
+	}); err != nil {
 		return nil, gut.Err(false, "error encoding image", err)
 	}
 
