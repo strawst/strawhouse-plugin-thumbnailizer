@@ -53,6 +53,8 @@ func UploadProcessor(c iface.Callbacker, res *pb.UploadFeedResponse) {
 	}
 
 	go func() {
+		res.Name = strings.TrimSuffix(res.Name, filepath.Ext(res.Name)) + ".webp"
+
 		reader := bytes.NewReader(resized03)
 		_, _, _, er = c.Callback().Upload(res.Name, filepath.Join(strings.Join(directories[0:4], "/"), "tmb03"), reader)
 		if er != nil {

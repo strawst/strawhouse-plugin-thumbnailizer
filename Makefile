@@ -5,4 +5,5 @@ build:
 .PHONY: build-linux
 build-linux:
 	docker run --name strawhouse-builder --rm -v $(PWD):/opt/ golang:1.23.4-bookworm \
-		/bin/bash -c "cd /opt/ && go build -trimpath -buildmode=plugin -o .local/thumbnailizer-linux.so ."
+		/bin/bash -c "apt update && apt install -y libwebp-dev && cd /opt/ && \
+			go build -trimpath -buildmode=plugin -o .local/thumbnailizer-linux.so ."
