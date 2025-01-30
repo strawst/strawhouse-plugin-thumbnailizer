@@ -13,6 +13,10 @@ import (
 	"sync"
 )
 
+type chunk struct {
+	startX, endX, startY, endY int
+}
+
 const (
 	chunkSize = 16
 )
@@ -38,8 +42,6 @@ func ResizeImage(src image.Image, targetPixels int, quality float32) ([]byte, *g
 
 	// Create a new image with the target dimensions
 	dst = image.NewRGBA(image.Rect(0, 0, targetWidth, targetHeight))
-
-	// Calculate number of worker goroutines based on CPU cores
 
 	// Start worker goroutines
 	for i := 0; i < workers; i++ {
@@ -77,10 +79,6 @@ encode:
 	return buf.Bytes(), nil
 }
 
-type chunk struct {
-	startX, endX, startY, endY int
-}
-
 func processChunk(src image.Image, dst *image.RGBA, c chunk, bounds image.Rectangle, targetWidth, targetHeight int) {
 	scaleX := float64(bounds.Dx()) / float64(targetWidth)
 	scaleY := float64(bounds.Dy()) / float64(targetHeight)
@@ -90,34 +88,8 @@ func processChunk(src image.Image, dst *image.RGBA, c chunk, bounds image.Rectan
 			srcX := float64(x) * scaleX
 			srcY := float64(y) * scaleY
 			col := bicubicInterpolation(src, srcX, srcY)
-			dst.Set(x, y, optimizeColor(col))
+			dst.Set(x, y, col)
 		}
-	}
-}
-
-func optimizeColor(c color.Color) color.Color {
-	r, g, b, a := c.RGBA()
-
-	// Convert to YCbCr color space
-	y := 0.299*float64(r) + 0.587*float64(g) + 0.114*float64(b)
-	cb := 128 - 0.168736*float64(r) - 0.331264*float64(g) + 0.5*float64(b)
-	cr := 128 + 0.5*float64(r) - 0.418688*float64(g) - 0.081312*float64(b)
-
-	// quantize color depth
-	y = math.Round(y/256) * 256
-	cb = math.Round(cb/256) * 256
-	cr = math.Round(cr/256) * 256
-
-	// Convert back to RGB
-	r = uint32(y + 1.402*(cr-128))
-	g = uint32(y - 0.344136*(cb-128) - 0.714136*(cr-128))
-	b = uint32(y + 1.772*(cb-128))
-
-	return color.RGBA{
-		R: uint8(clamp(int(r>>8), 0, 255)),
-		G: uint8(clamp(int(g>>8), 0, 255)),
-		B: uint8(clamp(int(b>>8), 0, 255)),
-		A: uint8(clamp(int(a>>8), 0, 255)),
 	}
 }
 
